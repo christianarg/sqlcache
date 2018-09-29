@@ -185,6 +185,7 @@ namespace Ovicus.Caching
 
         private void SetExpirationValues(SqlCommand cmd, CacheItemPolicy policy)
         {
+            // This correctly determines wheather DateTimeOffset has default value
             if (policy.AbsoluteExpiration != DateTimeOffset.MinValue && policy.AbsoluteExpiration != DateTimeOffset.MaxValue)
             {
                 cmd.Parameters["@AbsoluteExpirationTime"].Value = policy.AbsoluteExpiration.DateTime;
@@ -234,7 +235,7 @@ namespace Ovicus.Caching
         {
             get
             {
-                return DefaultCacheCapabilities.AbsoluteExpirations | DefaultCacheCapabilities.OutOfProcessProvider;
+                return DefaultCacheCapabilities.AbsoluteExpirations | DefaultCacheCapabilities.SlidingExpirations | DefaultCacheCapabilities.OutOfProcessProvider;
             }
         }
 

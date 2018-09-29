@@ -1,3 +1,4 @@
+(Forked from https://github.com/ovicus/sqlcache)
 Simple SQL-based Cache for .NET
 ===============================
 
@@ -11,12 +12,22 @@ suitable for distributed scenarios.
 
 The SqlCache implementation requires a table that should be created through the provided SQL script.
 
-What's new in version 1.1?
+A Flush method is provided that can be called from some kind of scheduled task (ex: AzureWebjobs).
+Another better approach to remove expired entries is using a SQL Job.
+
+Changes from my fork (compared to https://github.com/ovicus/sqlcache)
 --------------------------
-1. Custom cache table name supported.
-2. Add Flush method to remove expired entries.
+- I use JsonNet for serialization.
+- My flush method deletes sliding expiration items
+- Fixed bug when setting values with sliding expiration (original code ignores sliding expiration due a bug when comparing DateTimeOffset)
 
-Whilst the Flush method is provided, a better approach to remove expired entries is using a SQL Job.
+No nuget package yet. It's a single file, you can copy&paste SqlCache.cs, and install-package newtonsoft.json and your'e good to go.
 
-To use this library add a reference through Nuget:
-https://www.nuget.org/packages/Ovicus.Caching
+TODOs:
+- GetCount() does not ignore expired items with slidingexpiration 
+- Shound be able to pass JsonSerializerSettings on the constructor
+
+Another comments:
+
+Although a ChangeMonitor could be implemented, I like ovicus idea that you have to manually flush the expired items.
+If you implement a ChangeMonitor, it will be constantly "touching" the database in order to check for expired items and that could be an issue.
