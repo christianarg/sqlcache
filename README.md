@@ -14,7 +14,7 @@ suitable for distributed scenarios.
 The SqlCache implementation requires a table that should be created through the provided SQL script.
 
 A Flush method is provided that can be called from some kind of scheduled task (ex: AzureWebjobs).
-Another better approach to remove expired entries is using a SQL Job.
+Another approach to remove expired entries is using a SQL Job.
 
 Changes from my fork (compared to https://github.com/ovicus/sqlcache)
 --------------------------
