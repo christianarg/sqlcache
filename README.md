@@ -1,6 +1,7 @@
-(Forked from https://github.com/ovicus/sqlcache)
 Simple SQL-based Cache for .NET
 ===============================
+
+(Forked from https://github.com/ovicus/sqlcache)
 
 .NET 4.0 introduced a new caching API that extends the previous existing API 
 intended only for ASP.NET applications. The core of this new caching mechanism is the abstract class ObjectCache 
