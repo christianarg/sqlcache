@@ -43,30 +43,26 @@ namespace Ovicus.Caching
         private string connectionString;
         private string tableName = "Cache"; // Default table name
         private static readonly TimeSpan OneDay = new TimeSpan(24, 0, 0); // 1 day
-        // TODO: Pass JsonSerializer Settings
-        public SqlCache(string connectionString) : this("Default", connectionString) { }
+        private JsonSerializerSettings jsonSettings = new JsonSerializerSettings();
+        //public SqlCache(string connectionString) : this("Default", connectionString) { }
 
-        public SqlCache(string name, string connectionString)
+        public SqlCache(string connectionString, string name = "Default", string tableName = "Cache", JsonSerializerSettings jsonSerializerSettings = null)
         {
-            if (name == null)
-                throw new ArgumentNullException("name");
-
             if (string.IsNullOrEmpty(connectionString))
                 throw new ArgumentException("A valid connection string is required", "connectionString");
 
-            this.connectionString = connectionString;
-            this.name = name;
-        }
+            if (string.IsNullOrEmpty(name))
+                throw new ArgumentNullException("name");
 
-        public SqlCache(string name, string connectionString, string tableName)
-            : this(name, connectionString)
-        {
             if (string.IsNullOrEmpty(tableName))
                 throw new ArgumentException("A valid name for the cache table should be provided", "tableName");
 
-            this.tableName = tableName;
-        }
 
+            this.connectionString = connectionString;
+            this.name = name;
+            this.tableName = tableName;
+            this.jsonSettings = jsonSettings ?? new JsonSerializerSettings();
+        }
         private static string Serialize(object value)
         {
             return JsonConvert.SerializeObject(value);
