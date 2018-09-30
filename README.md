@@ -19,14 +19,11 @@ Another approach to remove expired entries is using a SQL Job.
 Changes from my fork (compared to https://github.com/ovicus/sqlcache)
 --------------------------
 - I use JsonNet for serialization.
-- My flush method deletes sliding expiration items
-- Fixed bug when setting values with sliding expiration (original code ignores sliding expiration due a bug when comparing DateTimeOffset)
+- Sliding expiration is implemented:
+	- My flush method deletes sliding expiration items
+	- Fixed bug when setting values with sliding expiration (original code ignores sliding expiration due a bug when comparing DateTimeOffset)
 
 No nuget package yet. It's a single file, you can copy&paste SqlCache.cs, and install-package newtonsoft.json and your'e good to go.
-
-TODOs:
-- GetCount() does not ignore expired items with slidingexpiration 
-- Shound be able to pass JsonSerializerSettings on the constructor
 
 Another comments:
 
