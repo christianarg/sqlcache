@@ -336,7 +336,8 @@ namespace SqlCaching.Caching
                 var reader = cmdSel.ExecuteReader();
                 while (reader.Read())
                 {
-                    yield return new KeyValuePair<string, object>((string)reader["Key"], reader["Value"]);
+                    var value = Deserialize(reader["Value"] as string);
+                    yield return new KeyValuePair<string, object>((string)reader["Key"], value);
                 }
             }
         }
