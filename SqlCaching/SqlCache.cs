@@ -30,12 +30,10 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
-using System.IO;
 using System.Runtime.Caching;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
 
-namespace Ovicus.Caching
+
+namespace SqlCaching.Caching
 {
     public class SqlCache : ObjectCache
     {

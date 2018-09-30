@@ -1,7 +1,8 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SqlCaching.Caching;
 
-namespace Ovicus.Caching.Test
+namespace SqlCaching.Test
 {
     [TestClass]
     public class SqlCacheTest
