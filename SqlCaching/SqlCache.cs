@@ -304,6 +304,8 @@ namespace Ovicus.Caching
             return obj != null ? new CacheItem(key, obj, regionName) : null;
         }
 
+        const string filterExpiredItemsCondition = "(AbsoluteExpirationTime > GETDATE()) OR (DATEADD(MINUTE,SlidingExpirationTimeInMinutes,LastAccess) > GETDATE())";
+
         public override long GetCount(string regionName = null)
         {
             // Count valid (not expired) items in cache
@@ -312,14 +314,11 @@ namespace Ovicus.Caching
                 SqlCommand cmdSel = new SqlCommand();
                 cmdSel.Connection = con;
 
-                const string cmdText = "SELECT COUNT([Key]) FROM {0} WHERE (AbsoluteExpirationTime > GETDATE()) OR (AbsoluteExpirationTime = NULL AND SlidingExpirationTimeInMinutes <> NULL)";
-                cmdSel.CommandText = string.Format(cmdText, tableName);
+                cmdSel.CommandText = $"SELECT COUNT([Key]) FROM {tableName} WHERE {filterExpiredItemsCondition}";
 
                 con.Open();
 
-                // TODO: Filter items with sliding expiration time
-
-                var count = (long)cmdSel.ExecuteScalar();
+                var count = (int)cmdSel.ExecuteScalar();
                 return count;
             }
         }
@@ -332,12 +331,9 @@ namespace Ovicus.Caching
                 SqlCommand cmdSel = new SqlCommand();
                 cmdSel.Connection = con;
 
-                const string cmdText = "SELECT [Key], [Value] FROM {0} WHERE (AbsoluteExpirationTime > GETDATE()) OR (AbsoluteExpirationTime = NULL AND SlidingExpirationTimeInMinutes <> NULL)";
-                cmdSel.CommandText = string.Format(cmdText, tableName);
+                cmdSel.CommandText = $"SELECT [Key], [Value] FROM {tableName} WHERE {filterExpiredItemsCondition}";
 
                 con.Open();
-
-                // TODO: Filter items with sliding expiration time
 
                 var reader = cmdSel.ExecuteReader();
                 while (reader.Read())
@@ -376,8 +372,8 @@ namespace Ovicus.Caching
                 SqlCommand cmdDel = new SqlCommand();
                 cmdDel.Connection = con;
 
-                const string cmdText = "DELETE FROM {0} WHERE [Key] = @Key";
-                cmdDel.CommandText = string.Format(cmdText, tableName);
+
+                cmdDel.CommandText = $"DELETE FROM {tableName} WHERE [Key] = @Key";
 
                 cmdDel.Parameters.AddWithValue("@Key", key);
                 con.Open();
@@ -430,14 +426,14 @@ namespace Ovicus.Caching
                 SqlCommand cmdDel = new SqlCommand();
                 cmdDel.Connection = con;
 
-                const string cmdDeleteAbsolute = "DELETE FROM {0} WHERE (AbsoluteExpirationTime <= GETDATE())";
-                cmdDel.CommandText = string.Format(cmdDeleteAbsolute, tableName);
+                string cmdDeleteAbsolute = $"DELETE FROM {tableName} WHERE (AbsoluteExpirationTime <= GETDATE())";
+                cmdDel.CommandText = cmdDeleteAbsolute;
 
                 con.Open();
                 cmdDel.ExecuteNonQuery();
 
-                const string cmdDeleteSliding = "DELETE FROM {0} WHERE (DATEADD(MINUTE,5,created) <= GETDATE())";
-                cmdDel.CommandText = string.Format(cmdDeleteSliding, tableName);
+                string cmdDeleteSliding = $"DELETE FROM {tableName} WHERE (DATEADD(MINUTE,SlidingExpirationTimeInMinutes,LastAccess) <= GETDATE())";
+                cmdDel.CommandText = cmdDeleteSliding;
 
                 cmdDel.ExecuteNonQuery();
             }
