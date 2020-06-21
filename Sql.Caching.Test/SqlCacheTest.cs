@@ -55,9 +55,9 @@ namespace SqlCaching.Test
             cache.Remove(key);
 
             // ASSERT
-            var result = cache.Contains(key);
+            var result = cache.Get(key);
 
-            Assert.AreEqual(result, false);
+            Assert.IsNull(result);
         }
 
         [TestMethod]
