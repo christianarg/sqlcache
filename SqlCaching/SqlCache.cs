@@ -37,8 +37,17 @@ namespace SqlCaching.Caching
         private static readonly TimeSpan OneDay = new TimeSpan(24, 0, 0); // 1 day
         private JsonSerializerSettings jsonSettings = new JsonSerializerSettings();
         //public SqlCache(string connectionString) : this("Default", connectionString) { }
+        private bool containsAlwaysReturnsTrue;
 
-        public SqlCache(string connectionString, string name = "Default", string tableName = "Cache", JsonSerializerSettings jsonSerializerSettings = null)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connectionString"></param>
+        /// <param name="name"></param>
+        /// <param name="tableName"></param>
+        /// <param name="jsonSerializerSettings"></param>
+        /// <param name="containsAlwaysReturnsTrue">TRADE-OFF: To avoid 2 comands when using contains + get. It assumes that codes that gets is protected against null value when getting data</param>
+        public SqlCache(string connectionString, string name = "Default", string tableName = "Cache", JsonSerializerSettings jsonSerializerSettings = null, bool containsAlwaysReturnsTrue = true)
         {
             if (string.IsNullOrEmpty(connectionString))
                 throw new ArgumentException("A valid connection string is required", "connectionString");
@@ -53,7 +62,8 @@ namespace SqlCaching.Caching
             this.connectionString = connectionString;
             this.name = name;
             this.tableName = tableName;
-            this.jsonSettings = jsonSettings ?? new JsonSerializerSettings();
+            this.jsonSettings = jsonSerializerSettings ?? new JsonSerializerSettings();
+            this.containsAlwaysReturnsTrue = containsAlwaysReturnsTrue;
         }
         private static string Serialize(object value)
         {
@@ -218,6 +228,10 @@ namespace SqlCaching.Caching
         /// <returns></returns>
         public override bool Contains(string key, string regionName = null)
         {
+            if (containsAlwaysReturnsTrue)
+            {
+                return true;    // TRADE-OFF: To avoid 2 accesses when using contains + get. It assumes that codes that get is protected against null
+            }
             return Get(key, regionName) != null;
         }
 
