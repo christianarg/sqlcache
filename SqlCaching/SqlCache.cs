@@ -426,13 +426,13 @@ namespace SqlCaching.Caching
                 SqlCommand cmdDel = new SqlCommand();
                 cmdDel.Connection = con;
 
-                string cmdDeleteAbsolute = $"DELETE FROM {tableName} WHERE (AbsoluteExpirationTime <= GETDATE())";
+                string cmdDeleteAbsolute = $"DELETE FROM {tableName} WHERE (AbsoluteExpirationTime <= SYSDATETIMEOFFSET())";
                 cmdDel.CommandText = cmdDeleteAbsolute;
 
                 con.Open();
                 cmdDel.ExecuteNonQuery();
 
-                string cmdDeleteSliding = $"DELETE FROM {tableName} WHERE (DATEADD(MINUTE,SlidingExpirationTimeInMinutes,LastAccess) <= GETDATE())";
+                string cmdDeleteSliding = $"DELETE FROM {tableName} WHERE (DATEADD(MINUTE,SlidingExpirationTimeInMinutes,LastAccess) <= SYSDATETIMEOFFSET())";
                 cmdDel.CommandText = cmdDeleteSliding;
 
                 cmdDel.ExecuteNonQuery();
