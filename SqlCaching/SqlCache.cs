@@ -303,7 +303,7 @@ namespace SqlCaching.Caching
             return obj != null ? new CacheItem(key, obj, regionName) : null;
         }
 
-        const string filterExpiredItemsCondition = "(AbsoluteExpirationTime > GETDATE()) OR (DATEADD(MINUTE,SlidingExpirationTimeInMinutes,LastAccess) > GETDATE())";
+        const string filterExpiredItemsCondition = "(AbsoluteExpirationTime > SYSDATETIMEOFFSET()) OR (DATEADD(MINUTE,SlidingExpirationTimeInMinutes,LastAccess) > SYSDATETIMEOFFSET())";
 
         public override long GetCount(string regionName = null)
         {

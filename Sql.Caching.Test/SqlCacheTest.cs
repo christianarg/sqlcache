@@ -7,6 +7,9 @@ using System.Linq;
 
 namespace SqlCaching.Test
 {
+    /// <summary>
+    /// Must create a database in  (LocalDb)\\MSSQLLocalDB named SqlCacheTests and execute Cache-Table-Creation.sql
+    /// </summary>
     [TestClass]
     public class SqlCacheTest
     {
