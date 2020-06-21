@@ -1,21 +1,16 @@
 ﻿/*
-
 The MIT License (MIT)
 http://opensource.org/licenses/MIT
-
 Original work Copyright (c) 2013 Lester Sánchez (lester@ovicus.com)
 Modified work Copyright (c) 2018 Christian Rodriguez (https://github.com/christianarg)  
-
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
-
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
-
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,7 +18,6 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
-
 */
 
 using Newtonsoft.Json;
@@ -32,7 +26,7 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Runtime.Caching;
 
-
+//https://github.com/christianarg/sqlcache
 namespace SqlCaching.Caching
 {
     public class SqlCache : ObjectCache
@@ -99,8 +93,8 @@ namespace SqlCaching.Caching
                 cmdIns.CommandText = string.Format(cmdText, tableName);
 
                 cmdIns.Parameters.AddWithValue("@Key", key);
-                cmdIns.Parameters.AddWithValue("@Created", DateTime.Now);
-                cmdIns.Parameters.AddWithValue("@LastAccess", DateTime.Now);
+                cmdIns.Parameters.AddWithValue("@Created", DateTimeOffset.Now);
+                cmdIns.Parameters.AddWithValue("@LastAccess", DateTimeOffset.Now);
                 cmdIns.Parameters.AddWithValue("@ObjectType", value.GetType().FullName);
                 cmdIns.Parameters.AddWithValue("@AbsoluteExpirationTime", DBNull.Value);
                 cmdIns.Parameters.AddWithValue("@SlidingExpirationTimeInMinutes", DBNull.Value);
@@ -129,8 +123,8 @@ namespace SqlCaching.Caching
                 cmdIns.CommandText = string.Format(cmdText, tableName);
 
                 cmdIns.Parameters.AddWithValue("@Key", key);
-                cmdIns.Parameters.AddWithValue("@Created", DateTime.Now);
-                cmdIns.Parameters.AddWithValue("@LastAccess", DateTime.Now);
+                cmdIns.Parameters.AddWithValue("@Created", DateTimeOffset.Now);
+                cmdIns.Parameters.AddWithValue("@LastAccess", DateTimeOffset.Now);
                 cmdIns.Parameters.AddWithValue("@ObjectType", value.GetType().FullName);
                 cmdIns.Parameters.AddWithValue("@AbsoluteExpirationTime", DBNull.Value);
                 cmdIns.Parameters.AddWithValue("@SlidingExpirationTimeInMinutes", DBNull.Value);
@@ -160,8 +154,8 @@ namespace SqlCaching.Caching
                 cmdUpd.CommandText = string.Format(cmdText, tableName);
 
                 cmdUpd.Parameters.AddWithValue("@Key", key);
-                cmdUpd.Parameters.AddWithValue("@Created", DateTime.Now);
-                cmdUpd.Parameters.AddWithValue("@LastAccess", DateTime.Now);
+                cmdUpd.Parameters.AddWithValue("@Created", DateTimeOffset.Now);
+                cmdUpd.Parameters.AddWithValue("@LastAccess", DateTimeOffset.Now);
                 cmdUpd.Parameters.AddWithValue("@ObjectType", value.GetType().FullName);
                 cmdUpd.Parameters.AddWithValue("@AbsoluteExpirationTime", DBNull.Value);
                 cmdUpd.Parameters.AddWithValue("@SlidingExpirationTimeInMinutes", DBNull.Value);
@@ -182,7 +176,7 @@ namespace SqlCaching.Caching
             // This correctly determines wheather DateTimeOffset has default value
             if (policy.AbsoluteExpiration != DateTimeOffset.MinValue && policy.AbsoluteExpiration != DateTimeOffset.MaxValue)
             {
-                cmd.Parameters["@AbsoluteExpirationTime"].Value = policy.AbsoluteExpiration.DateTime;
+                cmd.Parameters["@AbsoluteExpirationTime"].Value = policy.AbsoluteExpiration;
             }
             else if (policy.SlidingExpiration.Ticks > 0)
             {
@@ -190,7 +184,7 @@ namespace SqlCaching.Caching
             }
             else // Set default absolute expiration time
             {
-                cmd.Parameters["@AbsoluteExpiration"].Value = DateTime.Now.Add(OneDay);
+                cmd.Parameters["@AbsoluteExpiration"].Value = DateTimeOffset.Now.Add(OneDay);
             }
         }
 
@@ -215,6 +209,13 @@ namespace SqlCaching.Caching
             return AddOrGetExisting(key, value, policy, regionName);
         }
 
+        /// <summary>
+        /// It's not recommended for this provider to contains + get as it will execute the query twice
+        /// It's recommende to simply get and compare != null
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="regionName"></param>
+        /// <returns></returns>
         public override bool Contains(string key, string regionName = null)
         {
             return Get(key, regionName) != null;
@@ -258,16 +259,16 @@ namespace SqlCaching.Caching
                     // Check for absolute expiration date
                     if (absExpirationTime != null)
                     {
-                        var expiration = (DateTime)absExpirationTime;
-                        var created = (DateTime)reader["Created"];
-                        validCache = DateTime.Now.CompareTo(expiration) < 0;
+                        var expiration = (DateTimeOffset)absExpirationTime;
+                        var created = (DateTimeOffset)reader["Created"];
+                        validCache = DateTimeOffset.Now.CompareTo(expiration) < 0;
                     }
                     // Check for sliding expiration date
                     else if (slidingExpirationMinutes != null)
                     {
                         var minutes = (long)slidingExpirationMinutes;
-                        var lastAccess = (DateTime)reader["LastAccess"];
-                        validCache = DateTime.Now.CompareTo(lastAccess.AddMinutes(minutes)) < 0;
+                        var lastAccess = (DateTimeOffset)reader["LastAccess"];
+                        validCache = DateTimeOffset.Now.CompareTo(lastAccess.AddMinutes(minutes)) < 0;
                     }
 
                     if (validCache) // Object in cache is valid
@@ -284,7 +285,7 @@ namespace SqlCaching.Caching
                         cmdUpd.CommandText = string.Format(cmdText, tableName);
 
                         cmdUpd.Parameters.AddWithValue("@Key", key);
-                        cmdUpd.Parameters.AddWithValue("@LastAccess", DateTime.Now);
+                        cmdUpd.Parameters.AddWithValue("@LastAccess", DateTimeOffset.Now);
 
                         cmdUpd.ExecuteNonQuery();
 
@@ -411,7 +412,7 @@ namespace SqlCaching.Caching
             }
             set
             {
-                Set(key, value, DateTime.Now.Add(OneDay));
+                Set(key, value, DateTimeOffset.Now.Add(OneDay));
             }
         }
 

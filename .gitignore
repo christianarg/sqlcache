@@ -108,3 +108,4 @@ Backup*/
 UpgradeLog*.XML
 /.vs/SqlCaching/v15/Server/sqlite3
 /WebApplicationSqlCache/.vs
+/.vs/SqlCaching/v16/TestStore/0
